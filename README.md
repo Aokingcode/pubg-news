@@ -1,6 +1,6 @@
 # PUBG 新闻 📢
 
-获取 [PUBG 官网](https://pubg.com/news) 最新的新闻公告，支持 iOS Bark 发送通知 。
+获取 [PUBG 官网](https://pubg.com/news) 最新的新闻公告，支持通过 QQ 邮箱发送邮件通知。
 
 
 ---
@@ -10,7 +10,7 @@
 - 🔗 使用官网 API 获取新闻公告列表
 - 🌐 支持多语言获取并保存到多个 `.json` 文件
 - 🔢 自定义获取条数
-- 📲 指定语言有更新时通过 [Bark](https://github.com/Finb/Bark) 推送通知到 iOS 设备，支持图标、链接跳转
+- 📲 指定语言有更新时通过 QQ 邮箱 SMTP 发送邮件通知，邮件中包含摘要和原文链接
 - 🔍 推送通知支持排除特定关键词，例如 “每周违规账号公示”
 - ⏲️ 定时执行 `pubg_news.py` 以自动获取更新和推送通知
 
@@ -71,7 +71,7 @@ SIZE = 10
 ```python
 LANG = "zh-cn"
 ```
-获取指定语言时，有更新的内容将通过 [Bark](https://github.com/Finb/Bark) 推送通知到 iOS 设备，设置为空则关闭通知。
+获取指定语言时，有更新的内容将通过 QQ 邮箱发送邮件通知，设置为空则关闭通知。
 > ℹ️ 此项设置的语言必须已在 `LANGUAGES` 中设置。
 
 ### 排除关键词
@@ -80,37 +80,33 @@ EXCLUDE_KEYWORDS = ["每周违规账号公示"]
 ```
 新闻公告标题中包含任意排除关键词则不推送此条。
 
-### 通知标题
+### 邮件主题
 ```python
-BARK_PUSH_TITLE = "PUBG 新闻公告"  
+MAIL_SUBJECT = "PUBG 新闻公告"  
 ```
-通知显示的标题（新闻公告的标题将作为通知内容推送）。
+邮件主题前缀（新闻公告的标题将拼接到主题后，摘要和原文链接作为邮件内容推送）。
 
-### 通知图标
+### QQ 邮箱 SMTP 配置
 ```python
-BARK_PUSH_ICON = "https://wstatic-prod.pubg.com/web/live/static/favicons/apple-icon-180x180.png"  
+QQ_MAIL_USER = "你的QQ号@qq.com"
+QQ_MAIL_AUTH_CODE = "你的SMTP授权码"
+QQ_MAIL_TO = "收件人@qq.com"
 ```
-通知显示的图标，建议使用官网图标（默认）。
+- `QQ_MAIL_USER`：发件人 QQ 邮箱地址
+- `QQ_MAIL_AUTH_CODE`：QQ 邮箱 SMTP **授权码**（不是 QQ 密码），获取方式：QQ 邮箱网页版 → 设置 → 账户 → 开启 **SMTP 服务** → 生成授权码
+- `QQ_MAIL_TO`：收件人邮箱地址，可与发件人相同
 
-<img src="https://wstatic-prod.pubg.com/web/live/static/favicons/apple-icon-180x180.png" width="60" />
-
-图标效果
-
-### Bark 推送 URL
-```python
-BARK_PUSH_URL = "https://api.day.app/你的Key"
-```
-本地运行时设置 Bark 推送 URL , 请设置为 `https://api.day.app/你的Key`。
-
-> ⚠️ 注意：包含你的 Bark 推送密钥，代码在 Github 仓库或任何公开场景请勿设置！
+> ⚠️ 注意：授权码等同密码，代码在 Github 仓库或任何公开场景请勿设置！
 
 #### 使用环境变量
 ```bash
-export BARK_PUSH_URL=https://api.day.app/你的Key/
+export QQ_MAIL_USER=你的QQ号@qq.com
+export QQ_MAIL_AUTH_CODE=你的SMTP授权码
+export QQ_MAIL_TO=收件人@qq.com
 ```
-> 程序会优先使用 `BARK_PUSH_URL` 环境变量中的 Bark 推送 URL。
+> 程序会优先使用 `QQ_MAIL_USER`、`QQ_MAIL_AUTH_CODE`、`QQ_MAIL_TO` 环境变量。
 
-#### [GitHub Actions 设置环境变量](#2-在-secrets-中设置-bark_push_url-变量)
+#### [GitHub Actions 设置环境变量](#2-在-secrets-中设置-qq-邮箱变量)
 
 ---
 
@@ -119,23 +115,19 @@ export BARK_PUSH_URL=https://api.day.app/你的Key/
 ### 1. Fork 本仓库
 点击右上角的 “Fork” 按钮，将项目复制到你自己的 GitHub 账户中。
 
-### 2. 在 Secrets 中设置 BARK_PUSH_URL 变量
+### 2. 在 Secrets 中设置 QQ 邮箱变量
 
 在你的 GitHub 仓库中打开：
 
 > **Settings → Secrets → Actions**
 
-找到 `Repository secrets` 面板，点击右侧 <kbd>New repository secret</kbd> 按钮添加：
+找到 `Repository secrets` 面板，点击右侧 <kbd>New repository secret</kbd> 按钮添加以下三个 Secrets：
 
-Name *
-```
-BARK_PUSH_URL
-```
-Secret *
-```
-https://api.day.app/你的Key/
-```
-填写你的 Bark 推送 URL。
+| Name | Secret |
+| ---- | ------ |
+| `QQ_MAIL_USER` | 你的 QQ 邮箱地址，如 `12345678@qq.com` |
+| `QQ_MAIL_AUTH_CODE` | QQ 邮箱 SMTP 授权码 |
+| `QQ_MAIL_TO` | 收件人邮箱地址 |
 
 ### 3. 配置定时任务
 
