@@ -1,7 +1,9 @@
 import requests
 import json
 import os
-import urllib.parse
+import smtplib
+from email.mime.text import MIMEText
+from email.header import Header
 
 # === 配置变量 ===
 
@@ -17,20 +19,28 @@ LANG = "zh-cn"
 # 推送排除标题中包含指定关键字的新闻
 EXCLUDE_KEYWORDS = ["每周违规账号公示"]
 
-# 推送标题（新闻标题将作为通知内容推送）
-BARK_PUSH_TITLE = "PUBG 新闻"  
+# 邮件主题前缀（新闻标题将作为邮件主题推送）
+MAIL_SUBJECT = "PUBG 新闻"
 
-# 推送图标
-BARK_PUSH_ICON = "https://wstatic-prod.pubg.com/web/live/static/favicons/apple-icon-180x180.png"  
+# 发件人 QQ 邮箱地址
+# 如果上传 Github 请设置为空, 并在 Secrets 设置 QQ_MAIL_USER 变量
+QQ_MAIL_USER = ""
 
-# Bark 推送 URL , 请设置为 https://api.day.app/你的Key
-# 如果上传 Github 请设置为空, 并在 Secrets 设置 BARK_PUSH_URL 变量
-BARK_PUSH_URL = ""
+# QQ 邮箱 SMTP 授权码（QQ 邮箱设置 -> 账户 -> 开启 SMTP 服务后生成, 不是 QQ 密码）
+# 如果上传 Github 请设置为空, 并在 Secrets 设置 QQ_MAIL_AUTH_CODE 变量
+QQ_MAIL_AUTH_CODE = ""
+
+# 收件人邮箱地址, 可与发件人相同
+# 如果上传 Github 请设置为空, 并在 Secrets 设置 QQ_MAIL_TO 变量
+QQ_MAIL_TO = ""
 
 # === 配置段结束 ===
 
 SIZE = min(SIZE, 50)  # 上限 50
-BARK_PUSH_URL = (os.getenv("BARK_PUSH_URL") or BARK_PUSH_URL).rstrip("/")  # 环境变量配置优先
+# 环境变量配置优先
+QQ_MAIL_USER = (os.getenv("QQ_MAIL_USER") or QQ_MAIL_USER).strip()
+QQ_MAIL_AUTH_CODE = os.getenv("QQ_MAIL_AUTH_CODE") or QQ_MAIL_AUTH_CODE
+QQ_MAIL_TO = (os.getenv("QQ_MAIL_TO") or QQ_MAIL_TO).strip()
 
 def fetch_news(lang):
     api_url = f"https://api-foc.krafton.com/content/post/news?lang={lang}&displayLocationType=NORMAL&size={SIZE}&page=1"
@@ -95,20 +105,29 @@ def merge_news(existing, new):
     merged.sort(key=lambda x: x.get("displayTime", ""), reverse=True)
     return merged[:SIZE]
 
-def send_bark_notification(title, body, url):
+def send_mail_notification(title, body, url):
     try:
-        title_encoded = urllib.parse.quote(title)
-        body_encoded = urllib.parse.quote(body)
-        url_encoded = urllib.parse.quote(url)
-        icon_encoded = urllib.parse.quote(BARK_PUSH_ICON)
+        subject = f"{MAIL_SUBJECT}：{title}"
 
-        res = requests.get(f"{BARK_PUSH_URL}/{title_encoded}/{body_encoded}?url={url_encoded}&icon={icon_encoded}")
-        print(f"✅ Bark 推送完成: {title} / {body} [{res.status_code}]")
+        html_parts = [f"<h3>{title}</h3>"]
+        if body:
+            html_parts.append(f"<p>{body}</p>")
+        html_parts.append(f'<p><a href="{url}">查看原文</a></p>')
+
+        msg = MIMEText("".join(html_parts), "html", "utf-8")
+        msg["Subject"] = Header(subject, "utf-8")
+        msg["From"] = QQ_MAIL_USER
+        msg["To"] = QQ_MAIL_TO
+
+        with smtplib.SMTP_SSL("smtp.qq.com", 465) as server:
+            server.login(QQ_MAIL_USER, QQ_MAIL_AUTH_CODE)
+            server.sendmail(QQ_MAIL_USER, [QQ_MAIL_TO], msg.as_string())
+        print(f"✅ 邮件推送完成: {title} / {body}")
     except Exception as e:
-        print(f"❌ Bark 推送失败: {e}")
+        print(f"❌ 邮件推送失败: {e}")
 
 def push(existing, new):
-    if not BARK_PUSH_URL or not LANG:
+    if not QQ_MAIL_USER or not QQ_MAIL_AUTH_CODE or not QQ_MAIL_TO or not LANG:
         print("未配置推送。")
         return
     # 已保存的最后时间
@@ -128,7 +147,7 @@ def push(existing, new):
         if any(keyword in item["title"] for keyword in EXCLUDE_KEYWORDS):
             continue
                 
-        send_bark_notification(BARK_PUSH_TITLE, item["title"], item["newsUrl"])
+        send_mail_notification(item["title"], item["summary"], item["newsUrl"])
 
 def main():
     for lang in LANGUAGES:
