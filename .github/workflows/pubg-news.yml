@@ -5,6 +5,9 @@ on:
     - cron: '*/15 * * * *'  # 每15min执行一次
   workflow_dispatch:       # 允许手动触发
 
+permissions:
+  contents: write          # 允许 GITHUB_TOKEN 推送提交
+
 jobs:
   pubg-news:
     runs-on: ubuntu-latest
