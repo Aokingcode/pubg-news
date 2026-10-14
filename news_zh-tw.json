@@ -1,5 +1,20 @@
 [
     {
+        "title": "SLB：RONDO 破曉者",
+        "summary": "啟動發電機，挺過 Rondo 最黑暗的夜晚，迎接破曉黎明。",
+        "postId": 11138,
+        "category": "notice",
+        "labels": [
+            "label_pc",
+            "label_console"
+        ],
+        "createdAt": "2026-10-14 03:36:55",
+        "displayTime": "2026-10-14 05:00:00",
+        "imageUrl": "https://wstatic-prod-boc.krafton.com/common/content/news/20261014/QL3zlyic.jpg",
+        "thumbUrl": "https://wstatic-prod-boc.krafton.com/common/content/news/20261014/QL3zlyic_thumb.jpg",
+        "newsUrl": "https://pubg.com/zh-tw/news/11138"
+    },
+    {
         "title": "2026 年 10 月商店更新",
         "summary": "歡迎來到 2026 年的第十次商店更新！",
         "postId": 11182,
@@ -131,20 +146,5 @@
         "imageUrl": "https://wstatic-prod-boc.krafton.com/common/content/news/20260930/xWU89Kb5.jpg",
         "thumbUrl": "https://wstatic-prod-boc.krafton.com/common/content/news/20260930/xWU89Kb5_thumb.jpg",
         "newsUrl": "https://pubg.com/zh-tw/news/11135"
-    },
-    {
-        "title": "《絕地求生》反作弊行動！每週封鎖帳號名單 (09/07~09/13)",
-        "summary": "",
-        "postId": 11101,
-        "category": "notice",
-        "labels": [
-            "label_pc",
-            "label_console"
-        ],
-        "createdAt": "2026-09-17 07:55:18",
-        "displayTime": "2026-09-16 07:00:00",
-        "imageUrl": "https://wstatic-prod-boc.krafton.com/common/content/news/20260917/vwzwugGT.jpg",
-        "thumbUrl": "https://wstatic-prod-boc.krafton.com/common/content/news/20260917/vwzwugGT_thumb.jpg",
-        "newsUrl": "https://pubg.com/zh-tw/news/11101"
     }
 ]
